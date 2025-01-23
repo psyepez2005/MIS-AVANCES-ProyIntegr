@@ -12,7 +12,7 @@ case class FilmData(id: Int, title: String, releaseYear: Int, actorList: List[Ac
 
 object BaseDatos {
 
-  @main
+  //@main
   def main(): Unit = {
     val xa = Transactor.fromDriverManager[IO](
       driver = "com.mysql.cj.jdbc.Driver", // JDBC driver

@@ -50,5 +50,3 @@ val mayor = listGoles.max
 val datosParaPromedioOptimo: (Double,Int) =
   listGoles.foldLeft((0.0,0))((t2, currVal)=>(t2._1+currVal,t2._2+1))
 val promedio = datosParaPromedioOptimo._1/datosParaPromedioOptimo._2
-
- 

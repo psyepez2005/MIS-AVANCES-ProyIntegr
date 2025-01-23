@@ -2,8 +2,8 @@
 import com.github.tototoshi.csv.*
 import java.io.File
 object Proyecto {
-  @main
-  def generate():Unit = {
+  //@main
+  def main():Unit = {
     implicit object MiFormato extends DefaultCSVFormat {
       override val delimiter: Char = ';'
     }
