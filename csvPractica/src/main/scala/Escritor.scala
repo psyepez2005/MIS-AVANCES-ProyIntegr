@@ -22,7 +22,7 @@ def mainScriptGenerator(): Unit =
     val age = row.get("age").get.toInt
     val bio = escapeMySQL(row.get("bio").get)
     s"INSERT INTO PERSON(name, age, bio) VALUES ('$name', $age, $bio);"
-
+  
   var file = new BufferedWriter(new FileWriter(filePath))
   dataSample.foreach { row =>
     file.write(generateInsert(row))

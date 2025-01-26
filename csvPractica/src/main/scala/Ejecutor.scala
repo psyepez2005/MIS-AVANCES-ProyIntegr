@@ -79,36 +79,46 @@ object Ejecutor {
       "id",
       "popularity")
     //NO REPETIBLES
-    val columnasUnicas: List[String] = List(
+    val columnasNotNull: List[String] = List(
       "imdb_id",
       "id",
       "title")
+    //%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@
+    //                             LIMPIEZA DATOS NORMALES
+    //%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@
     //---------------------------------------------------------------------------------------------
     //==Borrar espacios en los textos
-    val dmTrim = limpiarEspacios(dataMap,todasColumnasNOJson)
-    println("Espacios al inicio y final eliminados...")
+    val dm1 = trimeador(dataMap)
+    println("\nMAPEO = Espacios al inicio y final eliminados...")
     //---------------------------------------------------------------------------------------------
-    //==Borrar películas con datos vacios
-    val dmtCompleto: List[Map[String, String]] = borrarDatosVacios(dmTrim, todasColumnasNOJson)
-    println("Borrando peliculas con algun atributo vacio menos homepage y tagline...")
-    println("Total de peliculas con todos los atributos menos homepage y tagline: " + dmtCompleto.length)
+    //==Borrar peliculas sin id, imdb_id ni title
+    val dm3 = borrarDatosVacios(dm1, columnasNotNull)
+    println("\nFILTRO = Peliculas sin id, imdb_id, title   borradas...")
+    println("Total de peliculas con id, imdb_id, title: " + dm3.length)
     //---------------------------------------------------------------------------------------------
     //==Borrar peliculas con id repetido
-    val dmtcSinIDRepetido = eliminarRepetidos("id", dmtCompleto)
-    println("Borrando peliculas con ids repetidos...")
-    println("Total de peliculas sin ids repetidos: "+ dmtcSinIDRepetido.length)
+    val dm4 = eliminarRepetidos("id", dm3)
+    println("\nFILTRO =Borrando peliculas con ids repetidos...")
+    println("Total de peliculas sin ids repetidos: " + dm4.length)
+    //---------------------------------------------------------------------------------------------
+    //==Borrar peliculas con imdb_id repetido
+    val dm5 = eliminarRepetidos("imdb_id", dm4)
+    println("\nFILTRO = Borrando peliculas con imdb_id repetidos...")
+    println("Total de peliculas sin imdb_id repetidos: " + dm5.length)
+    //---------------------------------------------------------------------------------------------
+    //==Cambiar numeros negativos por "NULL"
+    val dm6 = numerosNegativos(dm5, columnasNumericas)
+    println("\nMAPEO = Numeros negativos reemplazados por 0...")
+    //---------------------------------------------------------------------------------------------
+    //==Valores vacios reemplazados por "NULL"
+    val dm7 = llenarDatosVacios(dm6)
+    println("\nMAPEO = Valores vacios reemplazados por NULL...")
     //---------------------------------------------------------------------------------------------
 
-    /*
-    val valoresDiferentesVAL = valoresDiferentes("id", dmtcSinIDRepetido) //  Map[String,Int]
-    println("valores diferentes id: " )
-    valoresDiferentesVAL.foreach(println)
-    println(valoresDiferentesVAL.size)
+    //%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@
+    //                             LIMPIEZA DATOS JSONs
+    //%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@
 
-    val modaVAL = moda("id", dataMapSinRepetidos) //  Map[String,Int]
-    println("moda id: ")
-    println(modaVAL)
-    */
 
   }
 

@@ -8,28 +8,61 @@ object Limpiador {
   }
 
   def borrarDatosVacios(dataMap: List[Map[String, String]], columnas: List[String]): List[Map[String, String]] = {
-    val columnasSinHP_TL = columnas.filterNot(x => x.equals("homepage") || x.equals("tagline"))
-    
-    val dataLimpia = dataMap.filter(fila => columnasSinHP_TL.forall(col => fila.get(col).exists(_.nonEmpty)))
+
+    val dataLimpia = dataMap.filter(fila => columnas.forall(col => fila.get(col).exists(_.nonEmpty)))
 
     dataLimpia
   }
 
-  def limpiarEspacios(dataMap: List[Map[String, String]], columnas: List[String]): List[Map[String, String]] = {
-    val columnasSinHP_TL = columnas.filterNot(x => x.equals("homepage") || x.equals("tagline"))
+  def borrarSinLlaves(dataMap: List[Map[String, String]], columnas: List[String]): List[Map[String, String]] = {
+    val dataLimpia = dataMap.filter(fila => columnas.toSet.subsetOf(fila.keySet))
+    dataLimpia
+  }
 
-    val dataLimpia = dataMap.map { mapa =>
-      mapa.map {
-        case (llave, valor) if columnasSinHP_TL.contains(llave) => (llave, valor.trim) // Transformar si la clave está en `columnas`
-        case (llave, valor) => (llave, valor) // No transformar si la clave no está en `columnas`
+  def numerosNegativos(dataMap: List[Map[String, String]],columnas: List[String]): List[Map[String, String]] = {
+    val dataLimpia = dataMap.map(mapa =>
+      mapa.map{
+        (llave, valor) => {
+          try{
+            if (columnas.contains(llave) && valor.toLong < 0) (llave,"0")
+            else (llave, valor)
+          } catch{
+            case _ =>
+              if (columnas.contains(llave) && valor.toDouble < 0) (llave, "0")
+              else (llave, valor)
+          }
+        }
+
       }
+    )
+    dataLimpia
+  }
+
+
+
+  def llenarDatosVacios(dataMap: List[Map[String, String]]): List[Map[String, String]] = {
+    val dataLimpia = dataMap.map { mapa =>
+      mapa.map (
+        (key, valor) => if (valor.isEmpty) (key, "NULL") else (key, valor)
+      )
     }
     dataLimpia
   }
 
+
+  def trimeador(dataMap: List[Map[String, String]]): List[Map[String, String]] = {
+    val dataLimpia = dataMap.map { mapa =>
+      mapa.map (
+        (llave, valor) => (llave, valor.trim)
+      )
+    }
+    dataLimpia
+  }
+
+
   def eliminarRepetidos( columna: String,dataMap: List[Map[String, String]]): List[Map[String, String]] = {
 
-    val dataLimpia = dataMap.groupBy(_.get(columna)).values.map(_.head).toList //Map[String, List[String]], es lo mismo que .groupBy(adlt=>adlt)
+    val dataLimpia = dataMap.groupBy(_.get(columna)).values.map(_.head).toList
 
 
     dataLimpia
