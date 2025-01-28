@@ -1,9 +1,13 @@
 import LectorCSV.lectura
 import Limpiador.*
+import caseClassesJson.ratings
+import play.api.libs.json.{Json, OFormat}
+import transformadorAcaseclass.transformar
 
 object Ejecutor {
   //LEER EL CSV ENTREGADO
   val dataMap: List[Map[String, String]] = lectura()
+
   @main
   def main(): Unit = {
     //println(dataMap.head.foreach(println))
@@ -37,6 +41,18 @@ object Ejecutor {
       "budget",
       "id",
       "popularity"
+    )
+    //JSONs
+    val columnasJson: List[String] = List(
+      "belongs_to_collection",
+      "genres",
+      "production_companies",
+      "production_countries",
+      "spoken_languages",
+      "keywords",
+      "cast",
+      "crew",
+      "ratings"
     )
     //NO JSONS
     val todasColumnasNOJson: List[String] = List(
@@ -77,7 +93,12 @@ object Ejecutor {
     val columnasNumericas: List[String] = List(
       "budget",
       "id",
-      "popularity")
+      "popularity",
+      "revenue",
+      "runtime",
+      "vote_average",
+      "vote_count"
+      )
     //NO REPETIBLES
     val columnasNotNull: List[String] = List(
       "imdb_id",
@@ -92,59 +113,92 @@ object Ejecutor {
     println("\nMAPEO = Espacios al inicio y final eliminados...")
     //---------------------------------------------------------------------------------------------
     //==Borrar peliculas sin id, imdb_id ni title
-    val dm3 = borrarDatosVacios(dm1, columnasNotNull)
-    println("\nFILTRO = Peliculas sin id, imdb_id, title   borradas...")
-    println("Total de peliculas con id, imdb_id, title: " + dm3.length)
+    val dm2 = borrarDatosVacios(dm1, columnasNotNull)
+    println("\nFILTRO = Peliculas sin id, imdb_id, title borradas...")
+    println("Total de peliculas con id, imdb_id, title: " + dm2.length)
     //---------------------------------------------------------------------------------------------
     //==Borrar peliculas con id repetido
-    val dm4 = eliminarRepetidos("id", dm3)
+    val dm3 = eliminarRepetidos("id", dm2)
     println("\nFILTRO =Borrando peliculas con ids repetidos...")
-    println("Total de peliculas sin ids repetidos: " + dm4.length)
+    println("Total de peliculas sin ids repetidos: " + dm3.length)
     //---------------------------------------------------------------------------------------------
     //==Borrar peliculas con imdb_id repetido
-    val dm5 = eliminarRepetidos("imdb_id", dm4)
+    val dm4 = eliminarRepetidos("imdb_id", dm3)
     println("\nFILTRO = Borrando peliculas con imdb_id repetidos...")
-    println("Total de peliculas sin imdb_id repetidos: " + dm5.length)
+    println("Total de peliculas sin imdb_id repetidos: " + dm4.length)
     //---------------------------------------------------------------------------------------------
     //==Cambiar numeros negativos por "NULL"
-    val dm6 = numerosNegativos(dm5, columnasNumericas)
+    val dm5 = numerosNegativos(dm4, columnasNumericas)
     println("\nMAPEO = Numeros negativos reemplazados por 0...")
     //---------------------------------------------------------------------------------------------
     //==Valores vacios reemplazados por "NULL"
-    val dm7 = llenarDatosVacios(dm6)
+    val dm6 = llenarDatosVacios(dm5)
     println("\nMAPEO = Valores vacios reemplazados por NULL...")
     //---------------------------------------------------------------------------------------------
+    //==Numeros con notacion redondeados
+    val dm7 = simplificarNumeros(dm6, columnasNumericas)
+    println("\nMAPEO = Numeros redondeados...")
+    //---------------------------------------------------------------------------------------------
+
+
 
     //%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@
     //                             LIMPIEZA DATOS JSONs
     //%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@
+    val listPeliculas = transformar(dm7)
+    implicit val formato_spoken_languages: OFormat[caseClassesJson.ratings] = Json.format[ratings]
+
+    val ratingParceado = listPeliculas.map(mov => Json.parse(cleanJsonLista(mov.ratings)).as[List[ratings]])
+
+    ratingParceado.foreach(println)
 
 
-  }
 
-  def moda(columna: String, dataMap: List[Map[String, String]]): (String, Int) = {
-    val lista: List[String] =
-      dataMap
-        .flatMap(row => row.get(columna)) //
 
-    val moda: (String, Int) = lista
-      .groupBy(identity) //Map[String, List[String]], es lo mismo que .groupBy(adlt=>adlt)
-      .map(entrada => (entrada._1, entrada._2.length)) //Map[String,Int]
-      .maxBy(_._2) //(String,Int)
 
-    moda //retorno
-  }
 
-  def valoresDiferentes(columna: String, dataMap: List[Map[String, String]]):Map[String,Int] = {
-    val lista: List[String] =
-      dataMap
-        .flatMap(row => row.get(columna)) //
 
-    val valoresDiferentes: Map[String,Int] = lista
-      .groupBy(identity) //Map[String, List[String]], es lo mismo que .groupBy(adlt=>adlt)
-      .map(entrada => (entrada._1, entrada._2.length)) //Map[String,Int]
-      .filter(fil => fil._2 > 1)
 
-    valoresDiferentes //retorno
+
+
+
+
+
+
+
+
+
+    //listPeliculas.foreach(println)
+
+
+    val listaJsonsLimpiosBTC = listPeliculas.map(peli => cleanJsonUnico(peli.belongs_to_collection))
+    listaJsonsLimpiosBTC.foreach(println)
+
+
+    def moda(columna: String, dataMap: List[Map[String, String]]): (String, Int) = {
+      val lista: List[String] =
+        dataMap
+          .flatMap(row => row.get(columna)) //
+
+      val moda: (String, Int) = lista
+        .groupBy(identity) //Map[String, List[String]], es lo mismo que .groupBy(adlt=>adlt)
+        .map(entrada => (entrada._1, entrada._2.length)) //Map[String,Int]
+        .maxBy(_._2) //(String,Int)
+
+      moda //retorno
+    }
+
+    def valoresDiferentes(columna: String, dataMap: List[Map[String, String]]): Map[String, Int] = {
+      val lista: List[String] =
+        dataMap
+          .flatMap(row => row.get(columna)) //
+
+      val valoresDiferentes: Map[String, Int] = lista
+        .groupBy(identity) //Map[String, List[String]], es lo mismo que .groupBy(adlt=>adlt)
+        .map(entrada => (entrada._1, entrada._2.length)) //Map[String,Int]
+        //.filter(fil => fil._2 > 1)
+
+      valoresDiferentes //retorno
+    }
   }
 }

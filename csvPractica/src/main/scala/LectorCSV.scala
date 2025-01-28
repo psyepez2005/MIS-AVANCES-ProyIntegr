@@ -13,18 +13,6 @@ object LectorCSV {
     dataMap
   }
 
-  def moda(columna: String, dataMap: List[Map[String, String]]): Map[String, Int] = {
-    val lista: List[String] =
-      dataMap
-        .flatMap(row => row.get(columna)) //
-
-    val moda: Map[String, Int] = lista
-      .groupBy(identity) //Map[String, List[String]], es lo mismo que .groupBy(adlt=>adlt)
-      .map(entrada => (entrada._1, entrada._2.length)) //Map[String,Int]
-      //.maxBy(_._2) //(String,Int)
-
-    moda //retorno
-
-  }
 }
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////

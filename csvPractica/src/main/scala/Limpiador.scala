@@ -1,11 +1,109 @@
 
 object Limpiador {
-  def borrarIDsVacios(dataMap: List[Map[String, String]]):List[Map[String, String]]={
+  
+  def cleanJsonLista(json: String): String = {
+    try {
+      val cleanedJson = json
+        .replaceAll("'", "\"") // Cambia comillas simples por dobles
+        .replaceAll("None", "NULL") // Cambia None por null
+        .replaceAll("\\\\", "") // Elimina barras invertidas dobles
+        .replaceAll("\\s*:\\s*", ":") // Elimina espacios alrededor de los dos puntos
+        .replaceAll("\\s*,\\s*", ",") // Elimina espacios alrededor de las comas
+        .replaceAll("\\s*\\{\\s*", "{") // Elimina espacios después de llaves de apertura
+        .replaceAll("\\s*\\}\\s*", "}") // Elimina espacios antes de llaves de cierre
+        .replaceAll("\\s*\\[\\s*", "[") // Elimina espacios después de corchetes de apertura
+        .replaceAll("\\s*\\]\\s*", "]") // Elimina espacios antes de corchetes de cierre
+        .replaceAll("\r?\n", "") // Elimina saltos de línea
 
-    val dataLimpia = dataMap.filter(fila =>fila.get("id").nonEmpty )//  .contains("id") no verifica si el valor esta vacio, solo verifica si la clave existe
+      // Intentar parsear para validar el JSON
+      //val parsedJson = Json.parse(cleanedJson)
+      //Json.stringify(parsedJson) // Devuelve el JSON como String validado
+      cleanedJson
+    } catch {
+      case _: Exception =>
+        "[]"
+    }
+  }
+
+  def cleanJsonUnico(json: String): String = {
+    try {
+      val cleanedJson = json
+        .replaceAll("'", "\"") // Cambia comillas simples por dobles
+        .replaceAll("None", "NULL") // Cambia None por null
+        .replaceAll("\\\\", "") // Elimina barras invertidas dobles
+        .replaceAll("\\s*:\\s*", ":") // Elimina espacios alrededor de los dos puntos
+        .replaceAll("\\s*,\\s*", ",") // Elimina espacios alrededor de las comas
+        .replaceAll("\\s*\\{\\s*", "{") // Elimina espacios después de llaves de apertura
+        .replaceAll("\\s*\\}\\s*", "}") // Elimina espacios antes de llaves de cierre
+        .replaceAll("\r?\n", "") // Elimina saltos de línea
+
+      // Intentar parsear para validar el JSON
+      //val parsedJson = Json.parse(cleanedJson)
+      //Json.stringify(parsedJson) // Devuelve el JSON como String validado
+      cleanedJson
+    } catch {
+      case _: Exception =>
+        "{}"
+    }
+  }
+  
+  
+  def limpiadorJsons(dataMap:List[Map[String, String]], columna: String ):List[Map[String, String]]={
+    def cleanJsonUnico(json: String): String = {
+      try {
+        val cleanedJson = json
+          .replaceAll("'", "\"") // Cambia comillas simples por dobles
+          .replaceAll("NULL", "{}") // Cambia None por null
+          .replaceAll("\\\\", "") // Elimina barras invertidas dobles
+          .replaceAll("\\s*:\\s*", ":") // Elimina espacios alrededor de los dos puntos
+          .replaceAll("\\s*,\\s*", ",") // Elimina espacios alrededor de las comas
+          .replaceAll("\\s*\\{\\s*", "{") // Elimina espacios después de llaves de apertura
+          .replaceAll("\\s*\\}\\s*", "}") // Elimina espacios antes de llaves de cierre
+          .replaceAll("\r?\n", "") // Elimina saltos de línea
+
+        // Intentar parsear para validar el JSON
+        //val parsedJson = Json.parse(cleanedJson)
+        //Json.stringify(parsedJson) // Devuelve el JSON como String validado
+        cleanedJson
+      } catch {
+        case _: Exception =>
+          "{}"
+      }
+    }
+    val dataLimpia = dataMap.map(mapa=> mapa.map((llave,valor) => (llave,cleanJsonUnico(valor))))
+    
+    dataLimpia
+  }
+  
+  def formateadorJson(dataMap: List[Map[String, String]], columnas: List[String]): List[Map[String, String]] = {
+    def corregirJson(json: String): String = {
+      if (json.startsWith("{") && !json.endsWith("}")) return json + "}"
+      if (json.startsWith("[") && !json.endsWith("]")) return json + "]"
+      if (json.endsWith("}") && !json.startsWith("{")) return "{" + json
+      if (json.endsWith("]") && !json.startsWith("[")) return "[" + json
+      json
+    }
+
+    val dataLimpia = dataMap.map(mapa => mapa.map((llave, valor) => (llave, corregirJson(valor))))
 
     dataLimpia
   }
+
+
+  def validarJSONs(dataMap: List[Map[String, String]], columnas: List[String]): List[Map[String, String]] = {
+    val dataLimpia = dataMap.filter(mapa => columnas.forall(col =>
+      mapa.get(col) match {
+        case Some(valor) =>
+          valor.isEmpty ||
+            (valor.startsWith("[") && valor.endsWith("]")) ||
+            (valor.startsWith("{") && valor.endsWith("}"))  ||
+            valor == "NULL"
+      }
+    ))
+
+    dataLimpia
+  }
+
 
   def borrarDatosVacios(dataMap: List[Map[String, String]], columnas: List[String]): List[Map[String, String]] = {
 
@@ -18,25 +116,34 @@ object Limpiador {
     val dataLimpia = dataMap.filter(fila => columnas.toSet.subsetOf(fila.keySet))
     dataLimpia
   }
-
-  def numerosNegativos(dataMap: List[Map[String, String]],columnas: List[String]): List[Map[String, String]] = {
+  def simplificarNumeros(dataMap: List[Map[String, String]], columnas :List[String]): List[Map[String, String]] = {
     val dataLimpia = dataMap.map(mapa =>
       mapa.map{
-        (llave, valor) => {
-          try{
-            if (columnas.contains(llave) && valor.toLong < 0) (llave,"0")
-            else (llave, valor)
-          } catch{
-            case _ =>
-              if (columnas.contains(llave) && valor.toDouble < 0) (llave, "0")
-              else (llave, valor)
+        (llave, valor) => 
+          if (valor.contains(".")||valor.contains("-")) && columnas.contains(llave) then{
+            val num = valor.toDouble
+            val numRedondeado = Math.round(num)
+            (llave,""+numRedondeado)
           }
-        }
+          else (llave,valor)
+            
 
       }
     )
     dataLimpia
   }
+  def numerosNegativos(dataMap: List[Map[String, String]], columnas: List[String]): List[Map[String, String]] = {
+    val dataLimpia = dataMap.map { mapa =>
+      mapa.map { (llave, valor) =>
+        if (valor.isEmpty) (llave, "0")
+        else if (columnas.contains(llave) && (valor.toDouble < 0)) (llave, "0")
+
+        else (llave,valor)
+      }
+    }
+    dataLimpia
+  }
+
 
 
 
