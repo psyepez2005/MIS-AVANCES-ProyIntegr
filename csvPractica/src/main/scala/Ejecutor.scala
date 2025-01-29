@@ -1,6 +1,6 @@
 import LectorCSV.lectura
 import Limpiador.*
-import caseClassesJson.ratings
+import caseClassesJson.{spoken_languages}
 import play.api.libs.json.{Json, OFormat}
 import transformadorAcaseclass.transformar
 
@@ -132,11 +132,11 @@ object Ejecutor {
     println("\nMAPEO = Numeros negativos reemplazados por 0...")
     //---------------------------------------------------------------------------------------------
     //==Valores vacios reemplazados por "NULL"
-    val dm6 = llenarDatosVacios(dm5)
-    println("\nMAPEO = Valores vacios reemplazados por NULL...")
+    //val dm6 = llenarDatosVacios(dm5)
+    //println("\nMAPEO = Valores vacios reemplazados por NULL...")
     //---------------------------------------------------------------------------------------------
     //==Numeros con notacion redondeados
-    val dm7 = simplificarNumeros(dm6, columnasNumericas)
+    val dm7 = simplificarNumeros(dm5, columnasNumericas)
     println("\nMAPEO = Numeros redondeados...")
     //---------------------------------------------------------------------------------------------
 
@@ -145,12 +145,30 @@ object Ejecutor {
     //%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@
     //                             LIMPIEZA DATOS JSONs
     //%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@
+
+    //---------------------------------------------------------------------------------------------
+    //==Encerrar bien los JSONs
     val listPeliculas = transformar(dm7)
-    implicit val formato_spoken_languages: OFormat[caseClassesJson.ratings] = Json.format[ratings]
+    println("peliculas: "+listPeliculas.length)
 
-    val ratingParceado = listPeliculas.map(mov => Json.parse(cleanJsonLista(mov.ratings)).as[List[ratings]])
 
-    ratingParceado.foreach(println)
+    implicit val formato_spoken_languages: OFormat[caseClassesJson.spoken_languages] = Json.format[spoken_languages]
+
+    val spoken_languagesParceado = listPeliculas.map{mov =>
+      try{
+        Json.parse(cleanJsonLista(corregirJson(mov.spoken_languages))).as[List[spoken_languages]]
+      }catch{
+        case _ => null
+      }
+
+    }
+    println("lista de listas de spoken: "+spoken_languagesParceado.length)
+    //println(spoken_languagesParceado.count(_.isEmpty))
+    val idkk = spoken_languagesParceado.filterNot(x=>x==null)
+
+    println("lista de listas de spoken sin nulls: " + idkk.length)
+
+    //spoken_languagesParceado.foreach(println)
 
 
 
@@ -170,10 +188,10 @@ object Ejecutor {
 
     //listPeliculas.foreach(println)
 
-
+/*
     val listaJsonsLimpiosBTC = listPeliculas.map(peli => cleanJsonUnico(peli.belongs_to_collection))
     listaJsonsLimpiosBTC.foreach(println)
-
+*/
 
     def moda(columna: String, dataMap: List[Map[String, String]]): (String, Int) = {
       val lista: List[String] =

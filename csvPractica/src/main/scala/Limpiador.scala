@@ -1,5 +1,19 @@
-
+import play.api.libs.json.{Json, OFormat}
+import caseClassesJson.{spoken_languages}
 object Limpiador {
+  /*
+  def isValidJson(jsonStr: String): Boolean = {
+    implicit val formato_spoken_languages: OFormat[caseClassesJson.spoken_languages] = Json.format[spoken_languages]
+    val validationResult = Json.parse(jsonStr).validate[List[spoken_languages]]
+
+    validationResult match {
+      case JsSuccess(_, _) => true // Si es válido, retornamos true
+      case JsError(_) => false // Si no es válido, retornamos false
+    }
+  }
+*/
+  
+ 
   
   def cleanJsonLista(json: String): String = {
     try {
@@ -15,6 +29,7 @@ object Limpiador {
         .replaceAll("\\s*\\]\\s*", "]") // Elimina espacios antes de corchetes de cierre
         .replaceAll("\r?\n", "") // Elimina saltos de línea
 
+
       // Intentar parsear para validar el JSON
       //val parsedJson = Json.parse(cleanedJson)
       //Json.stringify(parsedJson) // Devuelve el JSON como String validado
@@ -25,6 +40,13 @@ object Limpiador {
     }
   }
 
+  def corregirJson(json: String): String = {
+    if (json.startsWith("{") && !json.endsWith("}")) return json + "}"
+    if (json.startsWith("[") && !json.endsWith("]")) return json + "]"
+    if (json.endsWith("}") && !json.startsWith("{")) return "{" + json
+    if (json.endsWith("]") && !json.startsWith("[")) return "[" + json
+    json
+  }
   def cleanJsonUnico(json: String): String = {
     try {
       val cleanedJson = json
@@ -47,7 +69,7 @@ object Limpiador {
     }
   }
   
-  
+  //def descartarJsons(peli:Pelicula)
   def limpiadorJsons(dataMap:List[Map[String, String]], columna: String ):List[Map[String, String]]={
     def cleanJsonUnico(json: String): String = {
       try {
@@ -97,7 +119,7 @@ object Limpiador {
           valor.isEmpty ||
             (valor.startsWith("[") && valor.endsWith("]")) ||
             (valor.startsWith("{") && valor.endsWith("}"))  ||
-            valor == "NULL"
+            valor == ""
       }
     ))
 
@@ -112,10 +134,13 @@ object Limpiador {
     dataLimpia
   }
 
+  /*
   def borrarSinLlaves(dataMap: List[Map[String, String]], columnas: List[String]): List[Map[String, String]] = {
     val dataLimpia = dataMap.filter(fila => columnas.toSet.subsetOf(fila.keySet))
     dataLimpia
-  }
+  }  
+*/
+
   def simplificarNumeros(dataMap: List[Map[String, String]], columnas :List[String]): List[Map[String, String]] = {
     val dataLimpia = dataMap.map(mapa =>
       mapa.map{
@@ -150,7 +175,7 @@ object Limpiador {
   def llenarDatosVacios(dataMap: List[Map[String, String]]): List[Map[String, String]] = {
     val dataLimpia = dataMap.map { mapa =>
       mapa.map (
-        (key, valor) => if (valor.isEmpty) (key, "NULL") else (key, valor)
+        (key, valor) => if (valor.isEmpty) (key, "null") else (key, valor)
       )
     }
     dataLimpia
@@ -176,23 +201,7 @@ object Limpiador {
   }
   
 //////////////////////////////////////////////////////////////////
-  def limpiarFila(fila: Map[String, String]): Map[String, String] = {
-    fila.map {
-      case (key, value) if value.isEmpty => (key, "VACIO")  
-      case noVacio => noVacio  
-    }
-  }
-  
-  
 
-  def transformarBools(lista: List[String]): List[Boolean] = {
-    val listaBooleanos = lista.map{
-      case "True" => true
-      case "False" => false
-      case _ => false
-    }
-    listaBooleanos
-  }
 
   def escapeMySQL(input: String): String = {
     input

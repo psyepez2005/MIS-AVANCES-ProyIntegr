@@ -20,7 +20,7 @@ object transformadorAcaseclass {
         release_date = mapa.get("release_date").toString,
         revenue = mapa("revenue").toLong,
         runtime = mapa("runtime").toInt,
-        spoken_languages = mapa.get("spoken_languages").toString,
+        spoken_languages = mapa("spoken_languages"),//OJO
         status = mapa.get("status").toString,
         tagline = mapa.get("tagline").toString,
         title = mapa.get("title").toString,
