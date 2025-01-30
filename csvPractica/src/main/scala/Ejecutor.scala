@@ -1,8 +1,10 @@
 import LectorCSV.lectura
 import Limpiador.*
-import caseClassesJson.{spoken_languages}
-import play.api.libs.json.{Json, OFormat}
+import caseClassesJson.*
+//import play.api.libs.json.{Json, OFormat}
 import transformadorAcaseclass.transformar
+import Parseador.*
+import ConstructorBD.*
 
 object Ejecutor {
   //LEER EL CSV ENTREGADO
@@ -13,6 +15,10 @@ object Ejecutor {
     //println(dataMap.head.foreach(println))
     //=========LIMPIAR DATOS========
     println("Total de peliculas sin limpiar: " + dataMap.length)
+
+    construir()
+
+
 
     //TOD0
     val todasColumnas: List[String] = List(
@@ -148,50 +154,32 @@ object Ejecutor {
 
     //---------------------------------------------------------------------------------------------
     //==Encerrar bien los JSONs
-    val listPeliculas = transformar(dm7)
-    println("peliculas: "+listPeliculas.length)
+    val listaPeliculas = transformar(dm7)
+    println("peliculas: "+listaPeliculas.length)
 
 
-    implicit val formato_spoken_languages: OFormat[caseClassesJson.spoken_languages] = Json.format[spoken_languages]
-
-    val spoken_languagesParceado = listPeliculas.map{mov =>
-      try{
-        Json.parse(cleanJsonLista(corregirJson(mov.spoken_languages))).as[List[spoken_languages]]
-      }catch{
-        case _ => null
-      }
-
-    }
-    println("lista de listas de spoken: "+spoken_languagesParceado.length)
-    //println(spoken_languagesParceado.count(_.isEmpty))
-    val idkk = spoken_languagesParceado.filterNot(x=>x==null)
-
-    println("lista de listas de spoken sin nulls: " + idkk.length)
-
-    //spoken_languagesParceado.foreach(println)
-
-
-
-
+    val listaCollection = lista_collection(listaPeliculas)
+    println("collection: " + listaCollection.length)
+    val listaGenres = lista_genres(listaPeliculas)
+    println("genres: "+listaGenres.length)
+    val listaProdCompan = lista_prod_compan(listaPeliculas)
+    println("prod companies: "+listaProdCompan.length)
+    val listaProdCount = lista_prod_countr(listaPeliculas)
+    println("prod countries: "+listaProdCount.length)
+    val listaSpokenLanguages = lista_spoken_lang(listaPeliculas)
+    println("spoken languages: "+listaSpokenLanguages.length)
+    val listaKeyWords = lista_keywords(listaPeliculas)
+    println("keywords: "+listaKeyWords.length)
+    val listaCast = lista_cast(listaPeliculas)
+    println("cast: "+listaCast.length)
+    val listaCrew = lista_crew(listaPeliculas)
+    println("crew: "+listaCrew.length)
+    val listaRatings = lista_ratings(listaPeliculas)
+    println("ratings: "+listaRatings.length)
 
 
 
 
-
-
-
-
-
-
-
-
-
-    //listPeliculas.foreach(println)
-
-/*
-    val listaJsonsLimpiosBTC = listPeliculas.map(peli => cleanJsonUnico(peli.belongs_to_collection))
-    listaJsonsLimpiosBTC.foreach(println)
-*/
 
     def moda(columna: String, dataMap: List[Map[String, String]]): (String, Int) = {
       val lista: List[String] =

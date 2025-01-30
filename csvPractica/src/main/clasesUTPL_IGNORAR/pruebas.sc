@@ -1,3 +1,5 @@
+import play.api.libs.json.Json
+
 /*
 import LectorCSV.lectura
 val dataMap: List[Map[String, String]] = lectura()
@@ -5,6 +7,101 @@ dataMap.foreach(println)
 val x = Map(1 -> 1, "2" -> 2,3 -> 3)
 x.size
 */
+
+def cleanJsonLista(json: String): String = {
+  if json.isEmpty then "[]xd"
+  else
+    try {
+      val cleanedJson = json
+        .replaceAll("'", "\"") // Cambia comillas simples por dobles
+        .replaceAll("None", "NULL") // Cambia None por null
+        .replaceAll("\\\\", "") // Elimina barras invertidas dobles
+        .replaceAll("\\s*:\\s*", ":") // Elimina espacios alrededor de los dos puntos
+        .replaceAll("\\s*,\\s*", ",") // Elimina espacios alrededor de las comas
+        .replaceAll("\\s*\\{\\s*", "{") // Elimina espacios después de llaves de apertura
+        .replaceAll("\\s*\\}\\s*", "}") // Elimina espacios antes de llaves de cierre
+        .replaceAll("\\s*\\[\\s*", "[") // Elimina espacios después de corchetes de apertura
+        .replaceAll("\\s*\\]\\s*", "]") // Elimina espacios antes de corchetes de cierre
+        .replaceAll("\r?\n", "") // Elimina saltos de línea
+
+
+      // Intentar parsear para validar el JSON
+      val parsedJson = Json.parse(cleanedJson)
+      val ass = Json.stringify(parsedJson) // Devuelve el JSON como String validado
+      ass
+      //cleanedJson
+    } catch {
+      case _: Exception =>
+        "[]"
+    }
+}
+val limpio = """{
+              |  "titulo": "Inception",
+              |  "año": 2010,
+              |  "genero": ["Ciencia ficción", "Acción"],
+              |  "director": {
+              |    "nombre": "Christopher Nolan",
+              |    "nacionalidad": "Británico"
+              |  },
+              |  "calificacion": 8.8
+              |}
+              |""".stripMargin
+val limpio2 = """[
+                |  {
+                |    "titulo": "Inception",
+                |    "año": 2010,
+                |    "genero": ["Ciencia ficción", "Acción"],
+                |    "director": {
+                |      "nombre": "Christopher Nolan",
+                |      "nacionalidad": "Británico"
+                |    },
+                |    "calificacion": 8.8
+                |  },
+                |  {
+                |    "titulo": "The Matrix",
+                |    "año": 1999,
+                |    "genero": ["Ciencia ficción", "Acción"],
+                |    "director": {
+                |      "nombre": "Lana Wachowski",
+                |      "nacionalidad": "Estadounidense"
+                |    },
+                |    "calificacion": 8.7
+                |  }
+                |]
+                |""".stripMargin
+
+val sucio ="""{
+             |  "titulo": "Inception"
+             |  "año": 2010,
+             |  "genero": ["Ciencia ficción", "Acción"
+             |  "director": {
+             |    "nombre": "Christopher Nolan",
+             |    "nacionalidad": "Británico",
+             |  },
+             |  "calificacion": 8.8,
+             |}
+             |""".stripMargin
+
+val vacio =""
+
+cleanJsonLista(limpio)
+cleanJsonLista(limpio2)
+cleanJsonLista(sucio)
+cleanJsonLista(vacio)
+
+val mapa = Map(("vacio",""),("lleno","hola"))
+//val nulo : Boolean = null
+//val numnulo:Int = null
+val kdi = mapa.get("lleno")
+val kdi2 = mapa.get("vacio")
+val kdi3 = mapa.getOrElse("lleno","orelselleno")
+val kdi4 = mapa.getOrElse("vacio","orelsevacio")
+val kdi5 = mapa.getOrElse("noexiste","orelsevacio")
+
+
+
+/*
+//===============================================================
 val x = "False"
 x.toBoolean
 
@@ -12,7 +109,7 @@ val o = "-314145544"
 o.toDouble
 o.toLong
 
-/*
+
 //===============================================================
 import ParseJson.jsonToMap
 import Limpiador.*

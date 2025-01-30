@@ -1,6 +1,6 @@
 import caseClassesJson.*
 import play.api.libs.json._
-import Limpiador.{cleanJsonUnico,cleanJsonLista}
+import Parseador.{cleanJsonUnico,cleanJsonLista}
 
 
 object json_mal_formado extends App {
