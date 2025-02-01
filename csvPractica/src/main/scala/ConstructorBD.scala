@@ -19,19 +19,20 @@ object ConstructorBD {
   }
   
   def crear(): ConnectionIO[Int] =(
-      sql"""CREATE SCHEMA IF NOT EXISTS prueba3
+      sql"""CREATE SCHEMA IF NOT EXISTS prueba7
          |COLLATE = utf8_general_ci;"""
         .stripMargin.update.run *>
-      sql"""USE prueba3;"""
+      sql"""USE prueba7;"""
         .stripMargin
         .update.run *>
       sql"""CREATE TABLE collection (
-           |	collection_id INTEGER PRIMARY KEY,
-           |	nombre VARCHAR(80),
-           |	poster_path VARCHAR(100),
-           |	backdrop_path VARCHAR(100)
+           |    collection_id INTEGER PRIMARY KEY COMMENT 'Identificador único de la colección',
+           |    nombre VARCHAR(80) COMMENT 'Nombre de la colección',
+           |    poster_path VARCHAR(100) COMMENT 'Ruta de la imagen del póster de la colección',
+           |    backdrop_path VARCHAR(100) COMMENT 'Ruta de la imagen de fondo de la colección'
            |)
-           |COMMENT = 'Recordables de la película los cuales pueden se recomendados a los Usuarios en caso de que el rating y aceptación de ellos sea elevado ';"""
+           |COMMENT = 'Recordables de la película los cuales pueden ser recomendados a los usuarios en caso de que el rating y aceptación de ellos sea elevado.';
+           |"""
         .stripMargin.update.run *>
       sql"""CREATE TABLE pelicula (
            |	pelicula_id INTEGER PRIMARY KEY,
@@ -215,6 +216,7 @@ object ConstructorBD {
         .update.run 
   )
 }
+
 
 /*
 sql"""USE PELICULAS_PROYECTO_INTEGRADOR;"""

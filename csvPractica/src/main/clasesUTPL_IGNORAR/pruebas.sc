@@ -7,7 +7,15 @@ dataMap.foreach(println)
 val x = Map(1 -> 1, "2" -> 2,3 -> 3)
 x.size
 */
-
+val i = ""
+i.isEmpty
+i.isBlank
+val e = "      "
+e.isEmpty
+e.isBlank
+val g = "      ".trim
+g.isEmpty
+g.isBlank
 def cleanJsonLista(json: String): String = {
   if json.isEmpty then "[]xd"
   else

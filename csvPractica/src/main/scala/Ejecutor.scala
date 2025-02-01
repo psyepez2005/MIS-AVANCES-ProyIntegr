@@ -1,22 +1,26 @@
 import LectorCSV.lectura
 import Limpiador.*
+import CLASE__IGNORAR_lectorJsonLISTMAP.mainn
+import PobladorDB.insertarCrew
 import caseClassesJson.*
 //import play.api.libs.json.{Json, OFormat}
 import transformadorAcaseclass.transformar
 import Parseador.*
+import ParseadorJSONS.*
 import ConstructorBD.*
 
 object Ejecutor {
   //LEER EL CSV ENTREGADO
-  val dataMap: List[Map[String, String]] = lectura()
 
-  @main
+
+  //@main
   def main(): Unit = {
+    val dataMap: List[Map[String, String]] = lectura()
     //println(dataMap.head.foreach(println))
     //=========LIMPIAR DATOS========
     println("Total de peliculas sin limpiar: " + dataMap.length)
 
-    construir()
+    
 
 
 
@@ -137,10 +141,6 @@ object Ejecutor {
     val dm5 = numerosNegativos(dm4, columnasNumericas)
     println("\nMAPEO = Numeros negativos reemplazados por 0...")
     //---------------------------------------------------------------------------------------------
-    //==Valores vacios reemplazados por "NULL"
-    //val dm6 = llenarDatosVacios(dm5)
-    //println("\nMAPEO = Valores vacios reemplazados por NULL...")
-    //---------------------------------------------------------------------------------------------
     //==Numeros con notacion redondeados
     val dm7 = simplificarNumeros(dm5, columnasNumericas)
     println("\nMAPEO = Numeros redondeados...")
@@ -152,11 +152,50 @@ object Ejecutor {
     //                             LIMPIEZA DATOS JSONs
     //%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@%%@@
 
+    val lista_collection = collectionLista(dm7)
+
+    val lista_genres = genresLista(dm7)
+
+
+    lista_genres.foreach(println)
+    println(lista_genres.length)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /*
     //---------------------------------------------------------------------------------------------
     //==Encerrar bien los JSONs
     val listaPeliculas = transformar(dm7)
     println("peliculas: "+listaPeliculas.length)
 
+    //construir()
 
     val listaCollection = lista_collection(listaPeliculas)
     println("collection: " + listaCollection.length)
@@ -174,8 +213,11 @@ object Ejecutor {
     println("cast: "+listaCast.length)
     val listaCrew = lista_crew(listaPeliculas)
     println("crew: "+listaCrew.length)
+    insertarCrew(listaCrew)
     val listaRatings = lista_ratings(listaPeliculas)
     println("ratings: "+listaRatings.length)
+    
+     
 
 
 
@@ -206,5 +248,7 @@ object Ejecutor {
 
       valoresDiferentes //retorno
     }
+
+     */
   }
 }

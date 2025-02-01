@@ -57,7 +57,7 @@ object Limpiador {
   def numerosNegativos(dataMap: List[Map[String, String]], columnas: List[String]): List[Map[String, String]] = {
     val dataLimpia = dataMap.map { mapa =>
       mapa.map { (llave, valor) =>
-        if (valor.isEmpty) (llave, "0")
+        if (columnas.contains(llave) && valor.isEmpty) (llave, "0")
         else if (columnas.contains(llave) && (valor.toDouble < 0)) (llave, "0")
 
         else (llave,valor)
