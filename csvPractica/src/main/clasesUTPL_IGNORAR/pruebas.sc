@@ -1,12 +1,64 @@
-import play.api.libs.json.Json
+import ParseadorJSONS.{corregirLLaves, eliminarIncompletos}
+import play.api.libs.json.*
 
+val lt1 = List(
+  (1,2,3,"a"),
+  (1,1,1,"b"),
+  (2,2,2,"c"),
+  (3,3,3,"a")
+)
+lt1.length
+lt1.distinct
+lt1.distinctBy(x => x._1)
+lt1.distinctBy(x => (x._3,x._4))
+
+
+val str1 : String = null
+val int1 : Int = 0
+
+val json = "[{\"name\": \"Polski State Film\", \"id\": 24674}, {\"name\": \"ZRF Kamera\", \"id\": 76032}]"
+val json2 = "[{\"name\": \"Polski State Film\", \"id\": 24674}, {\"name\": \"ZRF Kamera\", \"id\": 76032}]"
+
+val hola = Json.parse(json)
+val hola2 = hola.as[JsObject].value
+
+List((hola2("name").as[String],
+  hola2("id").as[Int]))
+
+hola2
+
+println(hola)
 /*
+def fixJson(rawJson: String): String = {
+  // Paso 1: Reemplazar todas las comillas simples por comillas dobles
+  val withDoubleQuotes = rawJson.replace("'", "\"")
+
+  // Expresión regular para encontrar las cadenas entre comillas dobles
+  val regex: Regex = "\"([^\"]*?)\"".r
+
+  // Paso 2: Restaurar las comillas simples dentro de los valores
+  // Usamos replaceAllIn para procesar cada coincidencia
+  val fixedJson = regex.replaceAllIn(withDoubleQuotes, m => {
+    val content = m.group(1)
+    // Restaurar comillas simples dentro del valor
+    "\"" + content.replace("\"", "'") + "\""
+  })
+
+  fixedJson
+}
+
+val jsonmalo = "[{'name': 'Polski State Film', 'id': 24674}, {'name': 'ZRF 'Kamera', 'id': 76032}]"
+
+val jsonbueno = fixJson(jsonmalo)
+
 import LectorCSV.lectura
 val dataMap: List[Map[String, String]] = lectura()
 dataMap.foreach(println)
 val x = Map(1 -> 1, "2" -> 2,3 -> 3)
 x.size
 */
+
+/*
 val i = ""
 i.isEmpty
 i.isBlank
@@ -108,7 +160,7 @@ val kdi5 = mapa.getOrElse("noexiste","orelsevacio")
 
 
 
-/*
+
 //===============================================================
 val x = "False"
 x.toBoolean

@@ -1,5 +1,43 @@
+import ParseadorJSONS.{corregirLLaves, eliminarIncompletos}
+import play.api.libs.json.Json
 
 object Limpiador {
+
+
+  def limpia(dataMap: List[Map[String, String]], columnas: List[String]): List[Map[String, String]] = {
+    val dataLimpia = dataMap.map { mapa =>
+      mapa.map((llave, valor) =>
+        if columnas.contains(llave) then
+          val json = cleanJsonLista(valor)
+          //val parse = Json.parse(json)
+          (llave, json)
+        else
+          (llave, valor)
+      )
+    }
+    dataLimpia
+  }
+  def cleanJsonLista(json: String): String = {
+    if json.isEmpty then "[]"
+    else
+      try {
+        val cleanedJson = json
+          .replaceAll("''","'null'")
+          .replaceAll("'", "\"") // Cambia comillas simples por dobles
+          .replaceAll("None", "null") // Cambia None por null
+          .replaceAll("\\\\", "") // Elimina barras invertidas dobles
+          //.replace("\\", "") // Elimina barras invertidas dobles
+          .replaceAll("\r?\n", "") // Elimina saltos de línea
+        val clean2 = eliminarIncompletos(corregirLLaves(cleanedJson))
+        // Intentar parsear para validar el JSON
+        val parsedJson = Json.parse(cleanedJson)
+        val retornoJSon = Json.stringify(parsedJson) // Devuelve el JSON como String validado
+        retornoJSon
+      } catch {
+        case _: Exception =>
+          "[]"
+      }
+  }
    
   def formateadorJson(dataMap: List[Map[String, String]], columnas: List[String]): List[Map[String, String]] = {
     def corregirJson(json: String): String = {
@@ -71,6 +109,15 @@ object Limpiador {
     val dataLimpia = dataMap.map { mapa =>
       mapa.map (
         (llave, valor) => (llave, valor.trim)
+      )
+    }
+    dataLimpia
+  }
+
+  def nulleador(dataMap: List[Map[String, String]]): List[Map[String, String]] = {
+    val dataLimpia = dataMap.map { mapa =>
+      mapa.map(
+        (llave, valor) =>  if (valor.isEmpty) (llave, "NULL") else (llave, valor)
       )
     }
     dataLimpia

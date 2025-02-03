@@ -4,6 +4,7 @@ import Limpiador.{borrarDatosVacios, eliminarRepetidos, numerosNegativos, simpli
 import play.api.libs.json.*
 
 import scala.util.*
+import scala.util.matching.Regex
 
 
 object CLASE__IGNORAR_lectorJsonLISTMAP {
@@ -101,7 +102,27 @@ object CLASE__IGNORAR_lectorJsonLISTMAP {
     println("total: " + tN.length)
     */
   }
-  @main
+
+  def fixJson(rawJson: String): String = {
+    // Expresión regular para detectar las claves y valores mal formateados
+    val regex: Regex = "'([^']*?)'".r
+
+    // Reemplazamos solo las comillas que encierran claves y valores
+    val y = regex.replaceAllIn(rawJson, m => "\"" + m.group(1) + "\"")
+    y
+  }
+
+  def eliminarIncompletos(json: String): String = {
+    if (json.contains('{')) {
+      val ultimo = json.lastIndexOf('}')
+      val arreglado = json.substring(0, ultimo).appended('}').appended(']')
+      arreglado
+    }
+    else
+      json
+  }
+
+  //@main
   def mainn(): Unit = {
 
     val dataMap: List[Map[String, String]] = lectura()
@@ -222,14 +243,13 @@ object CLASE__IGNORAR_lectorJsonLISTMAP {
     //---------------------------------------------------------------------------------------------
 
     val companies: List[String] = dm7
-      .flatMap(row => row.get("production_companies"))
+      .flatMap(row => row.get("crew"))
       .filterNot(x => x.isEmpty)
       .map(fila => fila.replaceAll("'", "\""))
       .map(corregirLLaves)
-      //.map(repl)
-      //.map(x => if !x.endsWith("\"}]") && x.startsWith("[{") then x.dropRight(2).appended('"').appended('}').appended(']') else x )
-      //.map(x => if x.charAt(x.length-2)==',' then x.dropRight(2).appended(']') else x )
-      //.map(x => if x.charAt(x.length-2)=='"' then x.dropRight(2).appended(']') else x )
+      .map(eliminarIncompletos)
+      //.map(x => if x.charAt(x.length - 2) == '"' then x.dropRight(2).appended('"').appended('}').appended(']') else x)
+
 
 
     val tup_companies = companies
@@ -244,7 +264,9 @@ object CLASE__IGNORAR_lectorJsonLISTMAP {
     val colMAl = tup_companies.filter(_.isFailure)
     colMAl.foreach(println)
 
-/*
+
+
+    /*
     val collections: List[String] = dm7
 
       .flatMap(row => row.get("belongs_to_collection"))

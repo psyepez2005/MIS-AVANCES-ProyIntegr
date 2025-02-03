@@ -2,7 +2,7 @@ import java.io.{BufferedWriter, FileWriter}
 import caseClassesJson.*
 
 object PobladorDB {
-  val filePath = "D:\\yeped\\Escritorio\\sqlspracticas\\insert_crew.sql"
+  val filePath = "D:\\yeped\\Escritorio\\sqlspracticas\\insert_peli.sql"
 
   def escapeSQL(valor: String): String = {
     if valor.isEmpty then "null"
@@ -17,6 +17,42 @@ object PobladorDB {
       .replaceAll("\u0000", "") // Eliminar caracteres nulos
       .replaceAll("\u001a", "\\Z") // Escapar fin de archivo
   }
+
+
+
+
+  def insertarCollectionDB(listaTuplas: List[(Int,String,String,String)]): Unit={
+
+
+    def insertar(tupla: (Int,String,String,String)): String = {
+      val collection_id = escapeSQL(tupla._1.toString)
+      val name =  escapeSQL(tupla._2)
+      val poster_path =  escapeSQL(tupla._3)
+      val backdrop_path =  escapeSQL(tupla._4)
+      s"INSERT INTO PERSON(collection_id, name, poster_path,backdrop_path) VALUES ($collection_id,'$name','$poster_path','$backdrop_path');"
+    }
+
+    val file = new BufferedWriter(new FileWriter(filePath))
+    listaTuplas.foreach { fila =>
+      file.write(insertar(fila))
+      file.newLine()
+    }
+    file.close()
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   def insertarCollection(lista: List[belongs_to_collection]): Unit = {
